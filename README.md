@@ -1,2 +1,2 @@
-# re-obj
-Reusable object for easy dump and load
+# reject
+REusable obJECT for easy dump and load

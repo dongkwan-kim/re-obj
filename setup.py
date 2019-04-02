@@ -15,17 +15,17 @@ def get_version(*file_paths):
     raise RuntimeError('Unable to find version string.')
 
 
-version = get_version("reobj", "__init__.py")
+version = get_version("reject", "__init__.py")
 readme = open('README.md').read()
 
 setup(
-    name='reobj',
+    name='reject',
     version=version,
-    description="""Reusable object for easy dump and load""",
+    description="""REusable obJECT for easy dump and load""",
     long_description=readme,
     author='Dongkwan Kim',
     author_email='todoaskit@gmail.com',
-    url='https://github.com/dongkwan-kim/re-obj',
+    url='https://github.com/dongkwan-kim/reject',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[

@@ -6,7 +6,10 @@ from termcolor import cprint
 
 
 class ReusableObject(object):
-    
+
+    # TODO: lambda variable handling
+    # TODO: Distributively dump/load
+
     def dump(self, file_name: str, file_path="./", msg=None, color="blue"):
         with open(os.path.join(file_path, file_name), 'wb') as f:
             pickle.dump(self, f)
@@ -24,6 +27,7 @@ class ReusableObject(object):
              file_path="./",
              msg=None,
              color="green") -> bool:
+        err = None
         try:
             with open(os.path.join(file_path, file_name), 'rb') as f:
                 loaded = pickle.load(f)
@@ -34,14 +38,15 @@ class ReusableObject(object):
                         setattr(self, k, v)
             ret = True
         except Exception as e:
-            print('Load Failed: {0}.\n'.format(file_name), str(e))
+            err = str(e)
             ret = False
 
         if msg is None:
             if ret:
                 msg = "Load {} ({})".format(os.path.join(file_path, file_name), self.__class__.__name__)
             else:
-                msg = "Load Failed {} ({})".format(os.path.join(file_path, file_name), self.__class__.__name__)
+                msg = "Load Failed {} ({})\n{}".format(
+                    os.path.join(file_path, file_name), self.__class__.__name__, err)
         elif msg and isinstance(msg, Callable):
             msg = msg(self, ret)
 

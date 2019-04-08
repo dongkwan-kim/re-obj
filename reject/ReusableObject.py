@@ -1,8 +1,15 @@
 import pickle
 import os
 from collections.abc import Iterable, Sized, Callable
+import types
 
 from termcolor import cprint
+
+
+def _is_savable(var):
+    if isinstance(var, types.LambdaType):
+        return False
+    return True
 
 
 class ReusableObject(object):

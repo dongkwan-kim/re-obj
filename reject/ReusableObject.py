@@ -1,53 +1,71 @@
 import pickle
 import os
 from collections.abc import Iterable, Sized, Callable
-import types
 
 from termcolor import cprint
 
-
-def _is_savable(var):
-    if isinstance(var, types.LambdaType):
-        return False
-    return True
+try:
+    from .utils import is_savable
+except ImportError:
+    from utils import is_savable
 
 
 class ReusableObject(object):
 
-    # TODO: lambda variable handling
     # TODO: Distributively dump/load
 
-    def dump(self, file_name: str, file_path="./", msg=None, color="blue"):
-        with open(os.path.join(file_path, file_name), 'wb') as f:
+    def dump(self,
+             file_name: str,
+             file_path="./",
+             msg=None,
+             color="blue"):
+
+        file_path_and_name = os.path.join(file_path, file_name)
+
+        # Make the directory if it does not exist.
+        real_dir = os.path.dirname(file_path_and_name)
+        if not os.path.isdir(real_dir):
+            os.makedirs(real_dir, exist_ok=False)
+
+        # Handle non-savable attributes
+        for k, v in self.__dict__.items():
+            if not is_savable(v):
+                setattr(self, k, None)
+
+        # Dump
+        with open(file_path_and_name, 'wb') as f:
             pickle.dump(self, f)
 
+        # Print messages
         if msg is None:
-            msg = "Dump {} ({})".format(os.path.join(file_path, file_name), self.__class__.__name__)
+            msg = "Dump {} ({})".format(file_path_and_name, self.__class__.__name__)
         elif msg and isinstance(msg, Callable):
             msg = msg(self)
         cprint(msg, color)
 
     def load(self,
              file_name: str,
+             file_path="./",
              attr_black_list: list = None,
              attr_white_list: list = None,
-             file_path="./",
              msg=None,
              color="green") -> bool:
-        err = None
+
+        # Load
         try:
             with open(os.path.join(file_path, file_name), 'rb') as f:
                 loaded = pickle.load(f)
                 for k, v in loaded.__dict__.items():
+                    # Check black list and white list
                     if (attr_black_list is None and attr_white_list is None) or \
                        (attr_black_list and k not in attr_black_list) or \
                        (attr_white_list and k in attr_white_list):
                         setattr(self, k, v)
-            ret = True
+            err, ret = None, True
         except Exception as e:
-            err = str(e)
-            ret = False
+            err, ret = str(e), False
 
+        # Print messages
         if msg is None:
             if ret:
                 msg = "Load {} ({})".format(os.path.join(file_path, file_name), self.__class__.__name__)

@@ -16,11 +16,11 @@ class ReusableObject(object):
 
     def dump(self,
              file_name: str,
-             file_path="./",
+             file_path=None,
              msg=None,
              color="blue"):
 
-        file_path_and_name = os.path.join(file_path, file_name)
+        file_path_and_name = os.path.join(file_path, file_name) if file_path is not None else file_name
 
         # Make the directory if it does not exist.
         real_dir = os.path.dirname(file_path_and_name)
@@ -45,15 +45,16 @@ class ReusableObject(object):
 
     def load(self,
              file_name: str,
-             file_path="./",
+             file_path=None,
              attr_black_list: list = None,
              attr_white_list: list = None,
              msg=None,
              color="green") -> bool:
 
         # Load
+        file_path_and_name = os.path.join(file_path, file_name) if file_path is not None else file_name
         try:
-            with open(os.path.join(file_path, file_name), 'rb') as f:
+            with open(file_path_and_name, 'rb') as f:
                 loaded = pickle.load(f)
                 for k, v in loaded.__dict__.items():
                     # Check black list and white list
@@ -68,10 +69,9 @@ class ReusableObject(object):
         # Print messages
         if msg is None:
             if ret:
-                msg = "Load {} ({})".format(os.path.join(file_path, file_name), self.__class__.__name__)
+                msg = "Load {} ({})".format(file_path_and_name, self.__class__.__name__)
             else:
-                msg = "Load Failed {} ({})\n{}".format(
-                    os.path.join(file_path, file_name), self.__class__.__name__, err)
+                msg = "Load Failed {} ({})\n{}".format(file_path_and_name, self.__class__.__name__, err)
         elif msg and isinstance(msg, Callable):
             msg = msg(self, ret)
 

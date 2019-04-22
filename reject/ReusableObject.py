@@ -24,6 +24,10 @@ class ReusableObject(object):
 
         # Make the directory if it does not exist.
         real_dir = os.path.dirname(file_path_and_name)
+
+        if real_dir.startswith("~"):
+            real_dir = real_dir.replace("~", os.path.expanduser("~"), 1)
+
         if not os.path.isdir(real_dir):
             os.makedirs(real_dir, exist_ok=False)
 
@@ -53,6 +57,8 @@ class ReusableObject(object):
 
         # Load
         file_path_and_name = os.path.join(file_path, file_name) if file_path is not None else file_name
+        if file_path_and_name.startswith("~"):
+            file_path_and_name = file_path_and_name.replace("~", os.path.expanduser("~"), 1)
         try:
             with open(file_path_and_name, 'rb') as f:
                 loaded = pickle.load(f)
